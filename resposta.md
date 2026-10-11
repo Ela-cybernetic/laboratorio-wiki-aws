@@ -85,7 +85,11 @@ Liste quais informações precisam ser identificadas para transformar os documen
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Das atas (imagem e PDF), as informações mais importantes são: a identificação do documento (tipo, código da ata, data, horário, local e formato da reunião), os participantes e suas funções, a pauta ou o objetivo, as decisões tomadas, os responsáveis por cada ação, os prazos, os próximos passos e a próxima reunião, os indicadores e números apresentados, e os riscos e pontos de atenção. Também é importante guardar as anotações manuscritas e os carimbos, como o “conferir CRM” e o “ação prioritária”, porque indicam o que merece atenção.
+
+Do CSV do CRM, as informações importantes são o código da oportunidade, o cliente, o segmento, a região, o vendedor, o produto, a campanha, o status, a probabilidade, os valores bruto e líquido, o desconto, o ciclo em dias, o motivo da perda, a próxima atividade e as observações.
+
+Em todos os casos, é essencial guardar o nome do arquivo original e o caminho dele, para que cada resposta possa indicar de qual documento veio. No caso da imagem digitalizada, também vale registrar o nível de confiança do OCR, para saber quais trechos precisam de revisão humana.
 ```
 
 ---
@@ -97,7 +101,13 @@ Como você classificaria os documentos sem depender de subpastas dentro de `raw/
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Como os arquivos estão todos soltos na mesma pasta, sem subpastas, a classificação precisa vir do próprio arquivo e não da organização dele. Eu faria isso em três camadas.
+
+Primeiro, pela extensão e pelo tipo de arquivo: .csv indica dado estruturado, .pdf indica documento digital e .png indica imagem que precisa de OCR. Isso já define o caminho de processamento de cada um.
+
+Segundo, pelo conteúdo, depois da extração do texto. Títulos como “Ata de Reunião Comercial” e a presença de campos como participantes, decisões e plano de ação indicam que o documento é uma ata, enquanto colunas como oportunidade_id e status indicam uma exportação de CRM. O Amazon Bedrock poderia ajudar a confirmar o tipo do documento e o tema a partir do texto extraído.
+
+Terceiro, o resultado dessa classificação seria guardado como metadado, por exemplo em etiquetas (tags) do S3 ou em uma tabela, e os arquivos originais continuariam no mesmo lugar, sem serem movidos nem alterados. Quando o sistema não tiver confiança suficiente para classificar um documento, ele seria marcado para revisão humana em vez de receber uma classificação errada.
 ```
 
 ---
@@ -119,7 +129,7 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Os arquivos da pasta `raw/` seriam enviados para um bucket do Amazon S3 criado só para os documentos originais, sem alterar nada na pasta local. O S3 é adequado porque guarda qualquer formato (`.png`, `.pdf` e `.csv`, como neste caso), cresce sozinho conforme o volume e custa pouco. O acesso seria controlado pelo AWS IAM, com permissões mínimas para cada função, e os arquivos seriam criptografados com o AWS KMS. Para reduzir custo ao longo do tempo, o S3 Lifecycle poderia mover documentos antigos para uma classe de armazenamento mais barata.
 ```
 
 ---
@@ -131,7 +141,8 @@ Explique como garantir que os arquivos originais sejam mantidos intactos e rastr
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Para manter os originais intactos, o bucket teria o S3 Versioning ativado, de modo que qualquer substituição ou exclusão acidental preserve a versão anterior. Também usaria o S3 Object Lock para impedir que os arquivos sejam apagados ou alterados. Todo o processamento trabalharia sobre cópias e resultados gravados em outro bucket, e os originais nunca seriam modificados. A rastreabilidade viria do nome e do caminho do arquivo original, guardados junto de cada texto extraído, e do AWS CloudTrail, que registra quem acessou ou tentou alterar cada arquivo.
+
 ```
 
 ---
@@ -160,7 +171,15 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Quando um arquivo chega ao S3, um evento aciona o AWS Step Functions, que decide o caminho pelo tipo do arquivo. Cada formato recebe um tratamento diferente:
+
+- **Imagem digitalizada (`.png`):** passa pelo Amazon Textract, porque é só imagem e precisa de OCR. Ele extrai o texto, as tabelas e a escrita à mão, e devolve um nível de confiança por trecho, para marcar o que precisa de revisão.
+- **PDF digital:** o texto já está dentro do arquivo, então é lido direto por uma função AWS Lambda, sem OCR. Isso é mais rápido e mais barato. O Textract só seria usado se fosse necessário preservar a estrutura das tabelas.
+- **CSV do CRM:** não precisa de OCR. É dado estruturado, então seria catalogado com o AWS Glue Data Catalog e consultado pelo Amazon Athena, em vez de virar texto corrido, para que perguntas sobre números tenham respostas precisas.
+- **Outros formatos (`.txt`, `.md`, `.docx`):** o texto é lido direto por uma Lambda, como no PDF digital, e arquivos escaneados ou em imagem seguem o caminho do Textract.
+
+Os resultados seriam gravados em um bucket separado, com o nome do arquivo original, e o Amazon CloudWatch registraria o andamento de cada etapa.
+
 ```
 
 ---
@@ -172,7 +191,7 @@ Explique como sua solução identificaria e registraria erros de processamento.
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+O Step Functions faria novas tentativas automáticas quando uma etapa falhar, por exemplo por instabilidade temporária, e depois disso enviaria o arquivo para um caminho de erro. As falhas seriam registradas no Amazon CloudWatch e gravadas em uma tabela com o nome do arquivo, a etapa que falhou e a mensagem de erro. Arquivos que não puderem ser processados ficariam em uma fila (Amazon SQS) para reprocessamento, e um alerta (Amazon SNS) avisaria a equipe. Quando o Textract devolver baixa confiança, como na parte coberta pelo carimbo, o texto seria marcado para revisão humana em vez de ser considerado correto. Assim, nenhum documento é perdido sem que alguém saiba.
 ```
 
 ---
