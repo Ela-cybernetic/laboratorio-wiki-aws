@@ -36,7 +36,15 @@ Exemplo de como responder, com o formato e o que ele implica:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+
+> Na pasta `raw/` encontrei três arquivos de formatos diferentes, e cada um exige um tratamento próprio.
+>
+> O arquivo nomeado de ata_resultados_vendas_novos_dados é uma imagem digitalizada, em `.png`, de uma ata de resultados comerciais da Vendas S.A. Por ser só imagem, ela não tem texto que possa ser lido diretamente, então é necessário usar OCR. O Amazon Textract funcionaria bem aqui, porque além do texto ele reconhece tabelas e escrita à mão. Desse documento dá para extrair a data, o horário e o local da reunião, os participantes, a tabela de indicadores comerciais, o desempenho por região e as deliberações com responsáveis e prazos. A imagem também tem uma anotação manuscrita ("conferir CRM") e carimbos que cobrem parte do texto, então o resultado do OCR pode vir com menos confiança nesses trechos.
+>
+> A ata_reuniao_vendas_sa é um PDF de cinco páginas de uma ata comercial, também da Vendas S.A. Esse arquivo já nasce digital: o texto está dentro dele e pode ser lido direto, sem OCR, o que é mais simples e mais barato. O Textract só seria útil se eu quisesse preservar a estrutura das tabelas, mas não é obrigatório. Dele dá para extrair a identificação da reunião (código da ata, data e formato), participantes e funções, a pauta, o painel de indicadores, as decisões aprovadas, o plano de ação, os riscos e a data da próxima reunião.
+>
+> vendas_sa_dados_ficticios_laboratorio é uma planilha em formato `.csv`. Ele é dado estruturado e já nasce digital, então não precisa de OCR. Dele dá para extrair o código da oportunidade, datas, cliente, segmento, região, vendedor, origem do lead, produto, campanha, status, probabilidade, valores bruto e líquido, desconto, ciclo em dias, motivo da perda, próxima atividade e observações. Como é uma tabela, ele não deve ser tratado como texto corrido: perguntas sobre decisões vêm das atas, e perguntas sobre números (quantas oportunidades, valor total, status) pedem um tratamento próprio para dados em colunas.
+
 ```
 
 ---
