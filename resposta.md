@@ -65,7 +65,15 @@ Exemplo:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Os três documentos estão soltos na mesma pasta, sem subpastas e sem um padrão de nomes, então o tipo e o assunto de cada um só aparecem depois de abrir o arquivo.
+
+A imagem digitalizada (.png) é o caso mais delicado. Ela precisa de OCR, está levemente inclinada e tem uma anotação manuscrita (“conferir CRM”) que o OCR pode ler com menos confiança. Também tem um carimbo vermelho que cobre parte de um prazo e de uma linha do plano de ação, o que pode gerar erro na data ou perda de texto. Além disso, é preciso que a tabela de indicadores mantenha linhas e colunas depois da extração.
+
+O PDF digital é mais simples, porque o texto já está nele, mas tem várias seções e tabelas, e o texto corrido pode perder a estrutura se for lido sem cuidado. Ele também é de uma reunião diferente da imagem (julho de 2026, contra janeiro de 2026), então existe o risco de a Wiki misturar informações de reuniões distintas.
+
+O CSV do CRM é dado estruturado, contudo há alguns campos vêm vazios, como a data de fechamento em oportunidades ainda abertas. Se for transformado em texto corrido, as respostas sobre os dados numéricos destas colunas podem ficar imprecisas.
+
+Na imagem possui uma anotação “conferir CRM” que mostra que os números das atas e os do CRM precisam ser cruzados. 
 ```
 
 ---
