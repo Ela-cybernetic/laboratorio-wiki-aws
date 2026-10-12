@@ -37,13 +37,13 @@ Exemplo de como responder, com o formato e o que ele implica:
 
 ```md
 
-> Na pasta `raw/` encontrei três arquivos de formatos diferentes, e cada um exige um tratamento próprio.
->
-> O arquivo nomeado de ata_resultados_vendas_novos_dados é uma imagem digitalizada, em `.png`, de uma ata de resultados comerciais da Vendas S.A. Por ser só imagem, ela não tem texto que possa ser lido diretamente, então é necessário usar OCR. O Amazon Textract funcionaria bem aqui, porque além do texto ele reconhece tabelas e escrita à mão. Desse documento dá para extrair a data, o horário e o local da reunião, os participantes, a tabela de indicadores comerciais, o desempenho por região e as deliberações com responsáveis e prazos. A imagem também tem uma anotação manuscrita ("conferir CRM") e carimbos que cobrem parte do texto, então o resultado do OCR pode vir com menos confiança nesses trechos.
->
-> A ata_reuniao_vendas_sa é um PDF de cinco páginas de uma ata comercial, também da Vendas S.A. Esse arquivo já nasce digital: o texto está dentro dele e pode ser lido direto, sem OCR, o que é mais simples e mais barato. O Textract só seria útil se eu quisesse preservar a estrutura das tabelas, mas não é obrigatório. Dele dá para extrair a identificação da reunião (código da ata, data e formato), participantes e funções, a pauta, o painel de indicadores, as decisões aprovadas, o plano de ação, os riscos e a data da próxima reunião.
->
-> vendas_sa_dados_ficticios_laboratorio é uma planilha em formato `.csv`. Ele é dado estruturado e já nasce digital, então não precisa de OCR. Dele dá para extrair o código da oportunidade, datas, cliente, segmento, região, vendedor, origem do lead, produto, campanha, status, probabilidade, valores bruto e líquido, desconto, ciclo em dias, motivo da perda, próxima atividade e observações. Como é uma tabela, ele não deve ser tratado como texto corrido: perguntas sobre decisões vêm das atas, e perguntas sobre números (quantas oportunidades, valor total, status) pedem um tratamento próprio para dados em colunas.
+Na pasta `raw/` encontrei três arquivos de formatos diferentes, e cada um exige um tratamento próprio.
+
+ O arquivo nomeado de ata_resultados_vendas_novos_dados é uma imagem digitalizada, em <`.png`>, de uma ata de resultados comerciais da Vendas S.A. Por ser só imagem, ela não tem texto que possa ser lido diretamente, então é necessário usar OCR. O Amazon Textract funcionaria bem aqui, porque além do texto ele reconhece tabelas e escrita à mão. Desse documento dá para extrair a data, o horário e o local da reunião, os participantes, a tabela de indicadores comerciais, o desempenho por região e as deliberações com responsáveis e prazos. A imagem também tem uma anotação manuscrita ("conferir CRM") e carimbos que cobrem parte do texto, então o resultado do OCR pode vir com menos confiança nesses trechos.
+
+ A ata_reuniao_vendas_sa é um <PDF> de cinco páginas de uma ata comercial, também da Vendas S.A. Esse arquivo já nasce digital: o texto está dentro dele e pode ser lido direto, sem OCR, o que é mais simples e mais barato. O Textract só seria útil se eu quisesse preservar a estrutura das tabelas, mas não é obrigatório. Dele dá para extrair a identificação da reunião (código da ata, data e formato), participantes e funções, a pauta, o painel de indicadores, as decisões aprovadas, o plano de ação, os riscos e a data da próxima reunião.
+
+ vendas_sa_dados_ficticios_laboratorio é uma planilha em formato <.csv>. Ele é dado estruturado e já nasce digital, então não precisa de OCR. Dele dá para extrair o código da oportunidade, datas, cliente, segmento, região, vendedor, origem do lead, produto, campanha, status, probabilidade, valores bruto e líquido, desconto, ciclo em dias, motivo da perda, próxima atividade e observações. Como é uma tabela, ele não deve ser tratado como texto corrido: perguntas sobre decisões vêm das atas, e perguntas sobre números (quantas oportunidades, valor total, status) pedem um tratamento próprio para dados em colunas.
 
 ```
 
@@ -173,10 +173,10 @@ Serviços que você pode considerar:
 ```md
 Quando um arquivo chega ao S3, um evento aciona o AWS Step Functions, que decide o caminho pelo tipo do arquivo. Cada formato recebe um tratamento diferente:
 
-- **Imagem digitalizada (`.png`):** passa pelo Amazon Textract, porque é só imagem e precisa de OCR. Ele extrai o texto, as tabelas e a escrita à mão, e devolve um nível de confiança por trecho, para marcar o que precisa de revisão.
-- **PDF digital:** o texto já está dentro do arquivo, então é lido direto por uma função AWS Lambda, sem OCR. Isso é mais rápido e mais barato. O Textract só seria usado se fosse necessário preservar a estrutura das tabelas.
-- **CSV do CRM:** não precisa de OCR. É dado estruturado, então seria catalogado com o AWS Glue Data Catalog e consultado pelo Amazon Athena, em vez de virar texto corrido, para que perguntas sobre números tenham respostas precisas.
-- **Outros formatos (`.txt`, `.md`, `.docx`):** o texto é lido direto por uma Lambda, como no PDF digital, e arquivos escaneados ou em imagem seguem o caminho do Textract.
+- Imagem digitalizada (`.png`): passa pelo Amazon Textract, porque é só imagem e precisa de OCR. Ele extrai o texto, as tabelas e a escrita à mão, e devolve um nível de confiança por trecho, para marcar o que precisa de revisão.
+- PDF digital: o texto já está dentro do arquivo, então é lido direto por uma função AWS Lambda, sem OCR. Isso é mais rápido e mais barato. O Textract só seria usado se fosse necessário preservar a estrutura das tabelas.
+- CSV do CRM: não precisa de OCR. É dado estruturado, então seria catalogado com o AWS Glue Data Catalog e consultado pelo Amazon Athena, em vez de virar texto corrido, para que perguntas sobre números tenham respostas precisas.
+- Outros formatos (`.txt`, `.md`, `.docx`): o texto é lido direto por uma Lambda, como no PDF digital, e arquivos escaneados ou em imagem seguem o caminho do Textract.
 
 Os resultados seriam gravados em um bucket separado, com o nome do arquivo original, e o Amazon CloudWatch registraria o andamento de cada etapa.
 
@@ -205,7 +205,7 @@ Explique como os textos extraídos seriam limpos, normalizados e preparados para
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Depois da extração, o texto de cada documento passaria por uma etapa de limpeza e padronização feita por funções AWS Lambda, coordenadas pelo Step Functions. Primeiro, eu removeria ruídos comuns de OCR e de PDF, como quebras de linha no meio das frases, espaços repetidos e rodapés que se repetem em todas as páginas (por exemplo "Página 1" e o aviso de material fictício). Depois, padronizaria os formatos: datas em AAAA-MM-DD, valores monetários como número (por exemplo, "R$ 9,85 mi" vira 9850000) e nomes de pessoas escritos sempre do mesmo jeito. Como a imagem digitalizada vem sem acentos, o texto também seria normalizado para que a busca encontre as palavras com ou sem acento. As tabelas seriam guardadas em formato estruturado (linhas e colunas), e não como texto corrido. No CSV, eu garantiria a codificação correta (UTF-8), os tipos de cada coluna e trataria os campos vazios como valores nulos. O resultado limpo de cada documento seria gravado em formato JSON em um bucket separado, mantendo o nome do arquivo original, para que o original nunca seja alterado.
 ```
 
 ---
@@ -216,18 +216,21 @@ Defina quais metadados você extrairia de cada documento.
 
 | Metadado | Por que ele é importante? |
 |---|---|
-| Nome do documento | Preencha aqui |
-| Tipo do documento | Preencha aqui |
-| Data identificada | Preencha aqui |
-| Tema principal | Preencha aqui |
-| Participantes | Preencha aqui |
-| Decisões tomadas | Preencha aqui |
-| Responsáveis | Preencha aqui |
-| Próximos passos | Preencha aqui |
-| Nível de confidencialidade | Preencha aqui |
-| Caminho do arquivo original | Preencha aqui |
+| Nome do documento | Identifica o arquivo e permite que a resposta diga de qual documento veio a informação. |
+| Tipo do documento | Separa atas, planilhas de CRM e outros formatos, e define como cada um é tratado e pesquisado. |
+| Data identificada | Diferencia reuniões diferentes (como janeiro e julho de 2026) e evita misturar informações de períodos distintos.|
+| Tema principal | Ajuda a encontrar o documento por assunto, mesmo quando a pergunta não usa as mesmas palavras. |
+| Participantes | Permite responder perguntas como "quem participou da reunião". |
+| Decisões tomadas | É o que mais se pergunta sobre uma ata, como "qual foi a decisão sobre o projeto X". |
+| Responsáveis | Liga cada decisão ou ação a uma pessoa. |
+| Próximos passos | Mostra o que ficou pendente, com responsável e prazo. |
+| Nível de confidencialidade | Define quem pode ver cada documento e protege os dados sensíveis. |
+| Caminho do arquivo original | Garante a rastreabilidade entre a resposta e o documento fonte. |
+| Código da ata | Identificador único de cada reunião, útil para evitar duplicidade. |
+| Região, segmento e status (CRM) | Permitem filtrar e agrupar as oportunidades do CRM. |
+| Nível de confiança do OCR | Indica quais trechos da imagem digitalizada precisam de revisão humana. |
 
-Adicione outros metadados, se necessário.
+
 
 ---
 
@@ -238,7 +241,7 @@ Explique como o Amazon Bedrock poderia ajudar a identificar temas, decisões, re
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+O Amazon Bedrock seria usado depois da limpeza do texto, para ler cada ata e preencher os metadados que não estão em campos prontos. A função Lambda enviaria o texto ao modelo com uma instrução clara, pedindo que ele devolva, em formato estruturado, o tema principal, as decisões tomadas, os responsáveis, as pendências e um resumo curto do documento. O modelo seria orientado a usar apenas o que está escrito no texto e a deixar o campo vazio quando a informação não existir, para não inventar. Como metadados gerados por IA podem ter erros, o resultado seria validado (por exemplo, checando se os responsáveis citados aparecem no texto) e os casos de baixa confiança seriam marcados para revisão humana. O Bedrock só ajuda a organizar e resumir: ele não altera o documento original, e o CSV do CRM não passa por ele, porque os números dele são consultados diretamente em colunas.
 ```
 
 ---
@@ -257,7 +260,7 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Os metadados de cada documento seriam guardados em dois lugares que se complementam. Primeiro, em uma tabela do Amazon DynamoDB, com uma linha por documento, para consultas rápidas por tipo, data, tema ou nível de confidencialidade. Segundo, em um arquivo JSON ao lado do texto processado no S3. Esse arquivo também serve ao Amazon Bedrock Knowledge Bases, que permite associar metadados a cada documento e usá-los para filtrar a busca e para indicar a fonte nas respostas. A ligação com o documento original é feita pelo caminho do arquivo no S3 (e pela versão, quando houver mais de uma), que fica gravado em todos os registros. Para o CSV do CRM, as colunas seriam catalogadas no AWS Glue Data Catalog e consultadas pelo Amazon Athena, e a mesma tabela do DynamoDB aponta para ele como o documento de origem.
 ```
 
 ---
@@ -271,7 +274,7 @@ Explique como os documentos seriam divididos em trechos menores e preparados par
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Os textos limpos das atas seriam divididos em trechos menores antes da busca. Como as atas já têm seções numeradas (participantes, decisões, plano de ação, riscos), eu dividiria por seção, em trechos de tamanho moderado e com uma pequena sobreposição entre eles, para que uma ideia não seja cortada no meio. As tabelas, como a de indicadores, ficariam inteiras em um único trecho, para não perderem o sentido. Cada trecho carregaria os metadados do documento (nome, tipo, data e caminho do arquivo original), o que permite filtrar a busca e indicar a fonte na resposta. O CSV do CRM não seria dividido assim: ele continua em colunas, consultado por SQL, e apenas as observações de texto livre poderiam ser indexadas de forma semântica.
 ```
 
 ---
@@ -291,7 +294,7 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Cada trecho seria transformado em um embedding, uma representação numérica do significado do texto, por um modelo de embeddings do Amazon Bedrock. A busca semântica compara a pergunta, também transformada em embedding, com esses vetores e encontra os trechos mais parecidos em significado, mesmo quando as palavras são diferentes. Para guardar os vetores, o Amazon Bedrock Knowledge Bases cuida da indexação de forma gerenciada. Como o acervo é pequeno, eu escolheria o Amazon S3 Vectors, por ter custo baixo e não exigir servidores; se o volume e a necessidade de busca avançada crescessem, o Amazon OpenSearch Serverless seria a alternativa. A disponibilidade de cada modelo e serviço deve ser conferida na região escolhida.
 ```
 
 ---
@@ -310,7 +313,8 @@ Considere explicar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+A pergunta do usuário chegaria pela interface a uma função AWS Lambda, que a envia ao Amazon Bedrock Knowledge Bases. Ele transforma a pergunta em embedding, recupera os trechos mais relevantes e os entrega ao modelo de linguagem do Bedrock, que escreve a resposta em linguagem natural usando apenas esses trechos. O modelo seria instruído a não inventar: se os trechos não tiverem a informação, ele responde que não encontrou nos documentos. Cada resposta indicaria as fontes usadas, com o nome do documento, a data e o trecho de onde veio, e o usuário poderia abrir o arquivo original. Perguntas sobre números do CRM, como "quanto vendemos na região Sul", seriam respondidas por uma consulta SQL no Amazon Athena, e o Bedrock só escreveria a resposta com o resultado já calculado.
+
 ```
 
 ---
@@ -330,7 +334,7 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Os usuários acessariam a Wiki por uma página web simples, no estilo de um chat, hospedada no AWS Amplify. A página conversa com a Amazon API Gateway, que aciona a função Lambda, e o login e o controle de quem entra seriam feitos pelo Amazon Cognito. Uma alternativa mais rápida de implantar seria o Amazon Q Business, que já traz uma interface pronta, mas com menos liberdade para personalizar as respostas e as citações. Para o uso no dia a dia, a pessoa digita perguntas como "qual foi a decisão sobre o projeto X?" e recebe a resposta com a fonte ao lado.
 ```
 
 ---
@@ -352,7 +356,11 @@ Serviços que você pode considerar:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+Acesso e proteção:o AWS IAM daria a cada serviço e pessoa só as permissões necessárias, e o AWS KMS criptografaria os arquivos e os dados. O Amazon Cognito separaria os usuários por perfil, e o nível de confidencialidade guardado nos metadados seria usado para filtrar os documentos que cada perfil pode consultar. O Amazon Macie poderia varrer o S3 em busca de dados sensíveis, como CPF, e avisar quando encontrar algum.
+
+Auditoria: o AWS CloudTrail registraria quem acessou ou alterou os arquivos, e as perguntas e respostas ficariam em logs, para saber quem consultou o quê.
+
+Monitoramento: o Amazon CloudWatch acompanharia erros, tempo de resposta e uso do Bedrock, com alarmes para falhas. O AWS Cost Explorer e alertas de orçamento controlariam o custo mensal. Para medir a qualidade das respostas, a interface teria um botão de "útil / não útil", e as perguntas sem resposta seriam registradas para revisão e melhoria da base.
 ```
 
 ---
@@ -368,7 +376,7 @@ Explique em poucas linhas a ideia central da sua arquitetura.
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+A solução recebe os documentos soltos da pasta `raw/`, guarda os originais no Amazon S3 sem alterá-los e, de acordo com o formato de cada arquivo, extrai o texto (Textract para imagens e leitura direta para PDFs digitais) ou cataloga os dados (CSV do CRM). Os textos são limpos e enriquecidos com metadados, indexados em uma base de conhecimento e consultados em linguagem natural pelo Amazon Bedrock, que responde sempre citando o documento de origem. Os números do CRM são consultados por SQL, e a IA só escreve a resposta.
 ```
 
 ---
@@ -377,17 +385,21 @@ Preencha aqui.
 
 | Serviço AWS | Papel na solução |
 |---|---|
-| Amazon S3 | Preencha aqui |
-| Amazon Textract | Preencha aqui |
-| Amazon Bedrock | Preencha aqui |
-| Amazon Bedrock Knowledge Bases | Preencha aqui |
-| AWS Lambda | Preencha aqui |
-| AWS Step Functions | Preencha aqui |
-| Amazon CloudWatch | Preencha aqui |
-| AWS IAM | Preencha aqui |
-| AWS KMS | Preencha aqui |
-
-Adicione, remova ou ajuste os serviços conforme sua proposta.
+| Amazon S3 | Guarda os arquivos originais (com Versioning e Object Lock), os textos processados e os metadados. |
+| Amazon Textract | Faz OCR da imagem digitalizada, extraindo texto, tabelas e escrita à mão. |
+| Amazon Bedrock | Enriquece os metadados e escreve as respostas em linguagem natural. |
+| Amazon Bedrock Knowledge Bases | Indexa os trechos, faz a busca semântica e devolve as fontes. |
+| AWS Lambda | Executa a leitura de PDFs, a limpeza dos textos e a chamada à base de conhecimento. |
+| AWS Step Functions | Coordena o fluxo de processamento e decide o caminho de cada tipo de arquivo. |
+| Amazon CloudWatch | Registra logs, métricas e alarmes de falha. |
+| AWS IAM | Controla as permissões de cada serviço e usuário. |
+| AWS KMS | Criptografa os arquivos e os dados. |
+| Amazon DynamoDB | Guarda os metadados de cada documento para consulta rápida. |
+| AWS Glue e Amazon Athena | Catalogam e consultam o CSV do CRM por SQL. |
+| Amazon API Gateway, AWS Amplify e Amazon Cognito | Entregam a interface web com login e controle de acesso. |
+| AWS CloudTrail | Audita acessos e alterações. |
+| Amazon SQS e Amazon SNS | Reprocessam arquivos com falha e avisam a equipe. |
+| Amazon Macie | Procura dados sensíveis nos arquivos do S3. |
 
 ---
 
@@ -412,7 +424,16 @@ Exemplo de estrutura:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+1. Os arquivos da pasta `raw/` são enviados para o Amazon S3, que preserva os originais com versionamento e bloqueio contra alterações.
+2. Um evento do S3 aciona o AWS Step Functions, que identifica o tipo de cada arquivo.
+3. A imagem digitalizada (`.png`) passa pelo Amazon Textract, que faz o OCR e devolve o texto, as tabelas e o nível de confiança.
+4. O PDF digital tem o texto lido direto por uma função Lambda, sem OCR.
+5. O CSV do CRM é catalogado pelo AWS Glue e fica disponível para consulta no Amazon Athena.
+6. Os textos são limpos e padronizados, com datas, valores e nomes no mesmo formato.
+7. O Amazon Bedrock extrai os metadados (tema, decisões, responsáveis, pendências), que são guardados no DynamoDB e em JSON no S3.
+8. Os textos viram trechos, recebem embeddings e são indexados no Amazon Bedrock Knowledge Bases.
+9. O usuário faz uma pergunta na interface web, depois de entrar com o Amazon Cognito.
+10. A base recupera os trechos relevantes (ou o Athena calcula os números do CRM) e o Bedrock escreve a resposta, citando o documento de origem.
 ```
 
 ---
@@ -430,7 +451,13 @@ raw/ → Amazon S3 → Lambda/Step Functions → Textract → S3 Processado → 
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+raw/ → Amazon S3 (originais) → Step Functions
+          ├─ .png → Textract (OCR) ─┐
+          ├─ .pdf → Lambda (leitura direta) ─┤→ Lambda (limpeza) → S3 processado
+          └─ .csv → Glue + Athena (consulta SQL)
+S3 processado → Bedrock (metadados) → DynamoDB + JSON no S3
+S3 processado → Bedrock Knowledge Bases (embeddings + busca)
+Usuário → Amplify + Cognito → API Gateway → Lambda → Knowledge Bases / Athena → Bedrock → Resposta com fontes
 ```
 
 ---
@@ -451,7 +478,12 @@ Exemplo:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+- A imagem digitalizada pode ser lida com erros pelo OCR, principalmente nas partes cobertas por carimbo e na anotação manuscrita.
+- Os metadados e as respostas geradas por IA podem conter erros e precisam de revisão humana nos casos de baixa confiança.
+- Os números das atas e os do CRM podem não bater, por serem de períodos e documentos diferentes, e a proposta só sinaliza as diferenças.
+- Os custos podem aumentar com o volume de documentos e de consultas, e por isso o monitoramento de custo é necessário.
+- A disponibilidade de modelos e serviços do Bedrock varia por região e deve ser conferida antes da implantação.
+- Esta é uma proposta em documentação: a solução não foi implementada nem testada na AWS.
 ```
 
 ---
@@ -473,7 +505,13 @@ Exemplo:
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+- Automatizar a entrada de novos arquivos, para que cheguem à base sozinhos.
+- Classificar os documentos por tipo, área e nível de confidencialidade.
+- Controlar o acesso por perfil ou departamento.
+- Estimar o custo mensal e comparar alternativas mais baratas.
+- Definir com clareza o que a Wiki responde quando a base não tem a informação.
+- Criar um painel de decisões e pendências, e alertas sobre ações com prazo próximo.
+- Integrar a Wiki com as ferramentas que a empresa já usa.
 ```
 
 ---
@@ -482,16 +520,16 @@ Preencha aqui.
 
 Antes de entregar, confirme se sua solução responde:
 
-- [ ] Como transformar documentos escaneados em texto?
-- [ ] Como lidar com diferentes formatos dentro da mesma pasta `raw/`?
-- [ ] Como armazenar os documentos originais?
-- [ ] Como preservar a rastreabilidade entre resposta e documento fonte?
-- [ ] Como organizar metadados?
-- [ ] Como criar busca semântica?
-- [ ] Como usar Amazon Bedrock na solução?
-- [ ] Como proteger documentos sensíveis?
-- [ ] Como monitorar falhas?
-- [ ] Como a empresa usaria essa Wiki no dia a dia?
+- [x] Como transformar documentos escaneados em texto?
+- [x] Como lidar com diferentes formatos dentro da mesma pasta `raw/`?
+- [x] Como armazenar os documentos originais?
+- [x] Como preservar a rastreabilidade entre resposta e documento fonte?
+- [x] Como organizar metadados?
+- [x] Como criar busca semântica?
+- [x] Como usar Amazon Bedrock na solução?
+- [x] Como proteger documentos sensíveis?
+- [x] Como monitorar falhas?
+- [x] Como a empresa usaria essa Wiki no dia a dia?
 
 ---
 
@@ -502,5 +540,5 @@ Escreva uma breve conclusão defendendo sua solução como se estivesse apresent
 **Sua resposta:**
 
 ```md
-Preencha aqui.
+A proposta transforma um acervo de documentos soltos e de formatos diferentes em uma Wiki que responde perguntas em linguagem natural, sempre indicando o documento de origem. O principal cuidado foi não tratar os três arquivos do mesmo jeito: a imagem digitalizada passa por OCR, o PDF digital tem o texto lido direto e o CSV do CRM é consultado como tabela, para que os números sejam precisos. Os arquivos originais ficam preservados, os metadados dão rastreabilidade, e o Amazon Bedrock se limita a organizar e escrever, sem decidir nada sozinho. Para a liderança, o ganho é encontrar decisões, responsáveis e prazos em segundos, com segurança de acesso, auditoria e controle de custo. Por ser uma proposta em documentação, o próximo passo seria validar a solução em um piloto pequeno na AWS antes de ampliá-la.
 ```
